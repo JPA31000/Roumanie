@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carnet de Voyage - Roumanie</title>
+    <!-- Tailwind CSS pour le style -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel pour lire le JSX directement dans le navigateur -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        // --- Icônes SVG (remplacement de lucide-react pour le format HTML) ---
+        const IconMapPin = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>;
+        const IconTrain = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="16" height="16" x="4" y="3" rx="2"/><path d="M4 11h16"/><path d="M12 3v8"/><path d="m8 19-2 3"/><path d="m18 22-2-3"/><path d="M8 15h0"/><path d="M16 15h0"/></svg>;
+        const IconPlane = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.5l-1.3 1.5c-.3.4-.1 1 .4 1.2L9 12l-3 3-3-1c-.5-.2-1 0-1.3.4l-.5.5c-.2.3 0 .7.3.8l3 1.5 1.5 3c.1.3.5.5.8.3l.5-.5c.4-.3.6-.8.4-1.3l-1-3 3-3 2.6 6.2c.2.4.8.6 1.2.4l1.5-1.3c.3-.2.6-.6.5-1.1z"/></svg>;
+        const IconBedDouble = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M2 20v-8a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v8"/><path d="M4 10V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4"/><path d="M12 4v6"/><path d="M2 18h20"/></svg>;
+        const IconCalendar = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>;
+        const IconInfo = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>;
+        const IconPrinter = ({ className }) => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>;
+
+        // --- Composants de l'application ---
+        const MapEmbed = ({ query, title }) => (
+          <div className="w-full h-64 bg-gray-200 rounded-lg overflow-hidden shadow-inner mt-4 print:h-48">
+            <iframe
+              title={title}
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              loading="lazy"
+              allowFullScreen
+              src={`https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=&z=14&ie=UTF8&iwloc=&output=embed`}
+            ></iframe>
+          </div>
+        );
+
+        const HotelCard = ({ name, stars, price, rating, desc }) => (
+          <div className="bg-white p-4 rounded-lg border border-gray-100 shadow-sm mb-3">
+            <div className="flex justify-between items-start mb-2">
+              <div>
+                <h4 className="font-semibold text-lg text-slate-800 flex items-center">
+                  <IconBedDouble className="w-4 h-4 mr-2 text-indigo-600" />
+                  {name} {stars && <span className="text-yellow-500 ml-2 text-sm">{stars}</span>}
+                </h4>
+                <p className="text-sm text-gray-500">Note: {rating} • Tarif indicatif: ~{price}</p>
+              </div>
+            </div>
+            <p className="text-sm text-gray-700">{desc}</p>
+          </div>
+        );
+
+        const TransportCard = ({ type, time, info, duration }) => {
+          const Icon = type === 'train' ? IconTrain : IconPlane;
+          return (
+            <div className="flex items-center bg-indigo-50 p-3 rounded-md mb-2 border border-indigo-100">
+              <div className="bg-indigo-100 p-2 rounded-full mr-3 flex-shrink-0">
+                <Icon className="w-5 h-5 text-indigo-700" />
+              </div>
+              <div>
+                <p className="font-medium text-indigo-900">{time}</p>
+                <p className="text-sm text-indigo-700">{info} {duration && <span className="text-indigo-500 text-xs ml-1">({duration})</span>}</p>
+              </div>
+            </div>
+          );
+        };
+
+        function App() {
+          const handlePrint = () => {
+            window.print();
+          };
+
+          return (
+            <div className="min-h-screen bg-slate-50 text-slate-800 font-sans p-4 md:p-8">
+              {/* Header */}
+              <div className="max-w-4xl mx-auto mb-8 flex flex-col md:flex-row justify-between items-start md:items-center">
+                <div>
+                  <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">Carnet de Voyage : Roumanie</h1>
+                  <p className="text-slate-600 flex items-center text-lg">
+                    <IconCalendar className="w-5 h-5 mr-2" />
+                    Du 16 au 19 Mars 2026
+                  </p>
+                </div>
+                <button 
+                  onClick={handlePrint}
+                  className="mt-4 md:mt-0 flex items-center bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg shadow transition-colors print:hidden"
+                >
+                  <IconPrinter className="w-5 h-5 mr-2" />
+                  Sauvegarder en PDF
+                </button>
+              </div>
+
+              <div className="max-w-4xl mx-auto space-y-8">
+                
+                {/* DAY 1 */}
+                <section className="bg-white rounded-xl shadow-md overflow-hidden print:shadow-none print:border print:border-gray-200">
+                  <div className="bg-indigo-600 px-6 py-4 text-white">
+                    <h2 className="text-xl font-bold flex items-center">
+                      <span className="bg-white text-indigo-600 rounded-full w-8 h-8 flex items-center justify-center mr-3">1</span>
+                      Lundi 16 Mars - Arrivée à Bucarest
+                    </h2>
+                  </div>
+                  <div className="p-6">
+                    <TransportCard type="plane" time="Vol Aller" info="Arrivée à l'Aéroport International Henri Coandă (OTP)." />
+                    <p className="mb-4 text-gray-700 mt-3">Depuis l'aéroport, prenez le train direct (CFR) situé juste à la sortie du terminal jusqu'à la <strong>Gara de Nord</strong> (25 min de trajet) pour être prêt pour le départ du lendemain.</p>
+                    
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div>
+                        <h3 className="text-lg font-semibold mb-3 flex items-center text-slate-800">
+                          <IconMapPin className="w-5 h-5 mr-2 text-red-500" /> Hôtels près de la gare
+                        </h3>
+                        <HotelCard 
+                          name="MyContinental Gara de Nord" stars="★★★" price="71 €" rating="4.4/5"
+                          desc="Convivial, chambres bien décorées, restaurant sur place. Très confortable pour se reposer avant le train."
+                        />
+                        <HotelCard 
+                          name="The Embassy Nord" stars="★★★" price="51 €" rating="4.5/5"
+                          desc="Moderne, très apprécié des voyageurs, excellent rapport qualité/prix. À quelques pas de la gare."
+                        />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold mb-3">Localisation : Gara de Nord</h3>
+                        <MapEmbed query="Gara de Nord, Bucharest, Romania" title="Carte Gara de Nord" />
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                {/* DAY 2 */}
+                <section className="bg-white rounded-xl shadow-md overflow-hidden print:shadow-none print:border print:border-gray-200 print:break-inside-avoid">
+                  <div className="bg-blue-600 px-6 py-4 text-white">
+                    <h2 className="text-xl font-bold flex items-center">
+                      <span className="bg-white text-blue-600 rounded-full w-8 h-8 flex items-center justify-center mr-3">2</span>
+                      Mardi 17 Mars - En route pour Galați
+                    </h2>
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-lg font-semibold mb-3 text-slate-800">Trajets conseillés</h3>
+                    <div className="grid md:grid-cols-2 gap-4 mb-6">
+                      <TransportCard type="train" time="08h30 ➔ 12h20" info="Train InterRegio (IR 1573)" duration="3h50" />
+                      <TransportCard type="train" time="13h23 ➔ 17h13" info="Train InterRegio (IR 1575)" duration="3h50" />
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div>
+                        <h3 className="text-lg font-semibold mb-3 flex items-center text-slate-800">
+                          <IconMapPin className="w-5 h-5 mr-2 text-red-500" /> Hôtels à Galați
+                        </h3>
+                        <HotelCard 
+                          name="Mercure Galati Centrum" stars="★★★★" price="97 €" rating="4.6/5"
+                          desc="Le choix du très grand confort, moderne et central. Prestations excellentes."
+                        />
+                        <HotelCard 
+                          name="Hotel City Break" stars="" price="54 €" rating="4.5/5"
+                          desc="Une belle alternative pour un excellent confort à un tarif intermédiaire."
+                        />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold mb-3">Localisation : Centre de Galați</h3>
+                        <MapEmbed query="Mercure Galati Centrum, Galati, Romania" title="Carte Galati" />
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                {/* DAY 3 */}
+                <section className="bg-white rounded-xl shadow-md overflow-hidden print:shadow-none print:border print:border-gray-200 print:break-inside-avoid">
+                  <div className="bg-teal-600 px-6 py-4 text-white">
+                    <h2 className="text-xl font-bold flex items-center">
+                      <span className="bg-white text-teal-600 rounded-full w-8 h-8 flex items-center justify-center mr-3">3</span>
+                      Mercredi 18 Mars - Retour vers l'Aéroport
+                    </h2>
+                  </div>
+                  <div className="p-6">
+                    <p className="mb-4 text-gray-700">Retour à Bucarest dans l'après-midi, puis transfert direct (25 min de train) vers l'aéroport Otopeni pour y passer la nuit sereinement.</p>
+                    
+                    <h3 className="text-lg font-semibold mb-3 text-slate-800">Trajets de retour conseillés</h3>
+                    <div className="grid md:grid-cols-2 gap-4 mb-6">
+                      <TransportCard type="train" time="14h30 ➔ 18h20" info="Galați ➔ Bucarest Nord" duration="3h50" />
+                      <TransportCard type="train" time="18h30 ➔ 22h21" info="Galați ➔ Bucarest Nord" duration="3h51" />
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-6">
+                      <div>
+                        <h3 className="text-lg font-semibold mb-3 flex items-center text-slate-800">
+                          <IconMapPin className="w-5 h-5 mr-2 text-red-500" /> Hôtels près de l'Aéroport
+                        </h3>
+                        <HotelCard 
+                          name="RIN Airport Hotel" stars="★★★★" price="59 €" rating="4.2/5"
+                          desc="Hôtel moderne avec navette aéroport gratuite et restaurant élégant."
+                        />
+                        <HotelCard 
+                          name="AIRPORT HOUSE" stars="" price="51 €" rating="4.9/5"
+                          desc="Maison d'hôtes très calme et chaleureuse, idéale pour une dernière soirée paisible."
+                        />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold mb-3">Localisation : Aéroport Otopeni</h3>
+                        <MapEmbed query="Henri Coanda International Airport, Otopeni, Romania" title="Carte Aéroport Otopeni" />
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                {/* DAY 4 */}
+                <section className="bg-white rounded-xl shadow-md overflow-hidden print:shadow-none print:border print:border-gray-200 print:break-inside-avoid">
+                  <div className="bg-slate-800 px-6 py-4 text-white">
+                    <h2 className="text-xl font-bold flex items-center">
+                      <span className="bg-white text-slate-800 rounded-full w-8 h-8 flex items-center justify-center mr-3">4</span>
+                      Jeudi 19 Mars - Départ
+                    </h2>
+                  </div>
+                  <div className="p-6">
+                     <TransportCard type="plane" time="Vol Retour" info="Départ depuis l'Aéroport International Henri Coandă (OTP)." />
+                     <p className="text-gray-600 mt-2 text-sm ml-12">En logeant à l'hôtel RIN ou à l'Airport House la veille, vous n'êtes qu'à quelques minutes du terminal de départ.</p>
+                  </div>
+                </section>
+
+                {/* Info pratiques */}
+                <div className="bg-orange-50 border-l-4 border-orange-400 p-4 rounded-r-lg print:break-inside-avoid">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <IconInfo className="h-5 w-5 text-orange-400" />
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-orange-800">Conseils Pratiques</h3>
+                      <div className="mt-2 text-sm text-orange-700">
+                        <ul className="list-disc pl-5 space-y-1">
+                          <li><strong>Billets de train :</strong> À réserver en ligne sur <a href="https://bilete.cfrcalatori.ro" className="underline font-semibold" target="_blank" rel="noreferrer">bilete.cfrcalatori.ro</a> (la réservation inclut une place assise).</li>
+                          <li><strong>Monnaie :</strong> Leu roumain (RON). La carte bancaire est acceptée quasiment partout.</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          );
+        }
+
+        // --- Rendu de l'application ---
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
